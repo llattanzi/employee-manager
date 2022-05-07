@@ -26,11 +26,8 @@ Employee.belongsTo(Department, {
     foreignKey: 'department_id'
 });
 
-Employee.hasMany(Employee, {
-    foreignKey: 'manager_id'
-});
-
 Employee.belongsTo(Employee, {
+    as: 'Manager',
     foreignKey: 'manager_id'
 });
 

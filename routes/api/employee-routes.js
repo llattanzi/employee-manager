@@ -21,7 +21,8 @@ router.get('/', (req, res) => {
             },
             // display employee's manager first and last name 
             {
-                model: Employee,
+                model: Employee, 
+                as: "Manager",
                 attributes: ['first_name', 'last_name']
             }
         ]
@@ -50,12 +51,38 @@ router.post('/', (req, res) => {
     });
 });
 
-// UPDATE /api/employee/:id
+// UPDATE /api/employee/updateRole/:id
 // change employee role
-router.put('/:id', (req, res) => {
+router.put('/updateRole/:id', (req, res) => {
     Employee.update(
         {
             role_id: req.body.role_id
+        },
+        {
+            where: {
+                id: req.params.id
+            }
+        }
+    )
+    .then(dbEmployeeData => {
+        if (!dbEmployeeData) {
+            res.status(404).json({ message: 'No employee found with this id' });
+            return;
+        }
+        res.json(dbEmployeeData);
+    })
+    .catch(err => {
+        console.log(err);
+        res.status(500).json(err);
+    });
+});
+
+// UPDATE /api/employee/updateManager/:id
+// change employee manager
+router.put('/updateManager/:id', (req, res) => {
+    Employee.update(
+        {
+            manager_id: req.body.manager_id
         },
         {
             where: {
