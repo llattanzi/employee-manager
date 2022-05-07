@@ -25,18 +25,18 @@ router.post('/', (req, res) => {
     });
 });
 
-// DELETE /api/department/:name
-// given selected department name, delete the department row from table
-router.delete('/:name', (req, res) => {
+// DELETE /api/department/:id
+// given selected department id, delete the department row from table
+router.delete('/:id', (req, res) => {
     Department.destroy({
         where: {
-            name: req.body.name
+            id: req.params.id
         }
     })
     .then(dbDepartmentData => {
-        // if the selected department name does not exist, return error message
+        // if the selected department id does not exist, return error message
         if (!dbDepartmentData) {
-            res.status(404).json({ message: 'No department found with this name' });
+            res.status(404).json({ message: 'No department found with this id' });
             return;
         }
         res.json(dbDepartmentData);
@@ -46,4 +46,6 @@ router.delete('/:name', (req, res) => {
         res.status(500).json(err);
     });
 });
+
+module.exports = router;
 

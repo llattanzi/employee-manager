@@ -26,4 +26,12 @@ Employee.belongsTo(Department, {
     foreignKey: 'department_id'
 });
 
+Employee.hasMany(Employee, {
+    foreignKey: 'manager_id'
+});
+
+Employee.belongsTo(Employee, {
+    foreignKey: 'manager_id'
+});
+
 module.exports = { Department, Role, Employee };

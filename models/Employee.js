@@ -28,6 +28,13 @@ Employee.init(
                 key: 'id'
             }
         },
+        department_id: {
+            types: DataTypes.INTEGER,
+            references: {
+                model: 'department',
+                key: 'id'
+            }
+        },
         manager_id: {
             type: DataTypes.INTEGER,
             references: {
