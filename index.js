@@ -1,6 +1,13 @@
 const fetch = require('node-fetch');
 const inquirer = require('inquirer');
 
+let deptNames;
+let roleNames;
+let employeeNames;
+let deptData;
+let roleData;
+let employeeData;
+
 function getDepartments() {
     fetch('http://localhost:3001/api/department', {
         method: 'GET',
@@ -16,12 +23,12 @@ function getDepartments() {
 function addDepartment() {
     inquirer.prompt({
         type: 'input',
-        name: 'deptName',
+        name: 'newDeptName',
         message: "Enter the Department name"
     })
-    .then(({ deptName }) => {
+    .then(({ newDeptName }) => {
         const newDept = {
-            name: deptName,
+            name: newDeptName,
         };
         fetch('http://localhost:3001/api/department', {
             method: 'POST',
@@ -31,7 +38,7 @@ function addDepartment() {
             body: JSON.stringify(newDept)
         })
         .then(() => {
-            console.log(`Added ${deptName} to the database`)
+            console.log(`Added ${newDeptName} to the database`)
         })
         .then(() => promptUser())
     })
@@ -49,7 +56,7 @@ function getRoles() {
     .then(() => promptUser())
 }
 
-function addRole() {
+function fetchDept(type) {
     // get available departments to choose to add a role to
     fetch('http://localhost:3001/api/department', {
         method: 'GET',
@@ -65,18 +72,49 @@ function addRole() {
             return promptUser()
         }
         // create a list of dept names to use as choices in prompt
-        let deptNames = response.map(function(elem) {
+        deptNames = response.map(function(elem) {
             return elem.name;
-        })
-        promptRole(deptNames, response)
+        });
+        deptData = response;
+        if (type === "Role") {
+            addRole();
+        }
+        else if (type === "Add employee") {
+            fetchRole(type);
+        }
     })
 }
 
-function promptRole(deptNames, deptArray) {
+function fetchRole(type) {
+    // get available roles to choose for an employee
+    fetch('http://localhost:3001/api/role', {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => response.json())
+    .then(response => {
+        // do not prompt for employee info if there are no roles to add to. Instead prompt main menu
+        if (!response) {
+            console.log("There are no roles to assign to an employee. Please add a role");
+            return promptUser()
+        }
+        // create a list of role names to use as choices in prompt
+        roleNames = response.map(function(elem) {
+            return elem.name;
+        });
+        roleData = response;
+
+        fetchEmployees(type);
+    })
+}
+
+function addRole() {
     inquirer.prompt([
         {
             type: 'input',
-            name: 'roleName',
+            name: 'role',
             message: "Enter the role name"
         },
         {
@@ -91,18 +129,18 @@ function promptRole(deptNames, deptArray) {
             choices: deptNames
         }
     ])
-    .then(({ roleName, salary, department }) => {
+    .then(({ role, salary, department }) => {
         // find the department id that corresponds to the selected dept name
         let deptId;
-        for (i = 0; i < deptArray.length; i++) {
-            if (deptArray[i].name === department) {
-                deptId = deptArray[i].id;
+        for (i = 0; i < deptData.length; i++) {
+            if (deptData[i].name === department) {
+                deptId = deptData[i].id;
                 break;
             }
         }
         // create a role object to pass into post request body
         const newRole = {
-            title: roleName,
+            title: role,
             salary: salary,
             department_id: deptId
         };
@@ -115,10 +153,55 @@ function promptRole(deptNames, deptArray) {
             body: JSON.stringify(newRole)
         })
         .then(() => {
-            console.log(`Added ${roleName} to the database`)
+            console.log(`Added ${role} to the database`)
         })
         .then(() => promptUser())
     })
+};
+
+function getEmployees() {
+    fetch('http://localhost:3001/api/employee', {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => response.json())
+    .then(response => console.table(response))
+    .then(() => promptUser())
+}
+
+function fetchEmployees(type) {
+    fetch('http://localhost:3001/api/employee', {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => response.json())
+    .then(response => {
+        // create a list of employee names to use as choices in prompt for manager
+        // if no employees, set employeeNames to null
+        if (!response) {
+            employeeNames = "";
+            return
+        }
+        employeeNames = response.map(function(elem) {
+            return elem.name;
+        });
+        employeeData = response;
+
+        if (type === 'Add employee') {
+            addEmployee();
+        }
+        else if (type === 'Update employee') {
+            updateEmployee();
+        }
+    })
+};
+
+function addEmployee() {
+
 }
 
 function promptUser() {
@@ -143,7 +226,15 @@ function promptUser() {
             getRoles();
         }
         else if (action === 'Add a role') {
-            addRole();
+            let type = 'Role';
+            fetchDept(type);
+        }
+        else if (action === 'View all employees') {
+            getEmployees();
+        }
+        else if (action === 'Add an employee') {
+            let type = 'Add employee';
+            fetchDept(type);
         }
     })
 }
