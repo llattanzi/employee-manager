@@ -4,7 +4,9 @@ const { Department } = require('../../models');
 // GET /api/department
 // displays department table
 router.get('/', (req, res) => {
-    Department.findAll()
+    Department.findAll({
+        attributes: { exclude: ['createdAt', 'updatedAt'] }
+    })
     .then(dbDepartmentData => res.json(dbDepartmentData))
     .catch(err => {
         console.log(err);
