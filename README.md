@@ -4,6 +4,8 @@
   ## Description:
   A command line application for managing your company's employee database
 
+  Demo Video Link: https://drive.google.com/file/d/1jV_PRBPluVgNSMS6gDTmboc8w6uD2uQA/view
+
   ## Table of Contents
   - [Description](#description)
   - [Installation](#installation)
