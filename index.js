@@ -290,7 +290,57 @@ function addEmployee() {
 };
 
 function updateEmployee(type) {
-    
+    inquirer.prompt({
+        type: 'list',
+        name: 'employee',
+        message: 'Select the employee you would like to update',
+        choices: employeeNames
+    })
+    .then(({ employee }) => {
+        // get id of selected employee
+        let employeeId;
+        for (i = 0; i < employeeData.length; i++) {
+            let fullName = `${employeeData[i].first_name} ${employeeData[i].last_name}`;
+            if (fullName === employee) {
+                employeeId = employeeData[i].id;
+                break;
+            }
+        }
+
+        if (type === 'Update role') {
+            inquirer.prompt({
+                type: 'list',
+                name: 'role',
+                message: 'Select a new role for the employee',
+                choices: roleNames
+            })
+            .then(({ role }) => {
+                let roleId;
+                for (i = 0; i < roleData.length; i++) {
+                    if (roleData[i].title === role) {
+                        roleId = roleData[i].id;
+                        break;
+                    }
+                }
+
+                const body = {
+                    role_id: roleId
+                };
+
+                fetch(`http://localhost:3001/api/employee/updateRole/${employeeId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(body)
+                })
+                .then(() => {
+                    console.log(`Updated employee role in database`)
+                })
+                .then(() => promptUser())
+            })
+        }
+    })
 }
 
 function updatePrompt() {
