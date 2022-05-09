@@ -340,6 +340,47 @@ function updateEmployee(type) {
                 .then(() => promptUser())
             })
         }
+        else if (type === "Update manager") {
+            inquirer.prompt({
+                type: 'list',
+                name: 'manager',
+                message: 'Select a new manager for the employee',
+                choices: employeeNames
+            })
+            .then(({ manager }) => {
+                // find the manager id that corresponds to the selected manager name
+                let managerId;
+                // set manager ID to null if no manager chosen
+                if (manager === 'None') {
+                    managerId = null;
+                }
+                else {
+                    for (i = 0; i < employeeData.length; i++) {
+                        let fullName = `${employeeData[i].first_name} ${employeeData[i].last_name}`;
+                        if (fullName === manager) {
+                            managerId = employeeData[i].id;
+                            break;
+                        }
+                    }
+                }
+
+                const body = {
+                    manager_id: managerId
+                };
+
+                fetch(`http://localhost:3001/api/employee/updateManager/${employeeId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(body)
+                })
+                .then(() => {
+                    console.log(`Updated employee manager in database`)
+                })
+                .then(() => promptUser())
+            })
+        }
     })
 }
 
